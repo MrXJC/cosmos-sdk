@@ -63,7 +63,7 @@ type GaiaApp struct {
 func NewGaiaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, baseAppOptions ...func(*bam.BaseApp)) *GaiaApp {
 	cdc := MakeCodec()
 
-	bApp := bam.NewBaseApp(appName, cdc, logger, db, baseAppOptions...)
+	bApp := bam.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
 
 	var app = &GaiaApp{
@@ -143,8 +143,8 @@ func (app *GaiaApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) ab
 // application updates every end block
 // nolint: unparam
 func (app *GaiaApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	validatorUpdates := stake.EndBlocker(ctx, app.stakeKeeper)
 
+	validatorUpdates := stake.EndBlocker(ctx, app.stakeKeeper)
 	tags, _ := gov.EndBlocker(ctx, app.govKeeper)
 
 	return abci.ResponseEndBlock{

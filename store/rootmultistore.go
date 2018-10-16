@@ -500,6 +500,7 @@ func commitStores(version int64, storeMap map[StoreKey]CommitStore) commitInfo {
 			Version:    version,
 			StoreInfos: storeInfos,
 		}
+		fmt.Println(ci)
 		return ci
 
 	} else {

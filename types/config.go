@@ -4,12 +4,13 @@ import (
 	"sync"
 )
 
-// Config is the structure that holds the SDK configuration parameters
-// This could be used to initialize certain configuration parameters for the SDK
+// Config is the structure that holds the SDK configuration parameters.
+// This could be used to initialize certain configuration parameters for the SDK.
 type Config struct {
 	mtx                 sync.RWMutex
 	sealed              bool
 	bech32AddressPrefix map[string]string
+	txEncoder           TxEncoder
 }
 
 var (
@@ -24,6 +25,7 @@ var (
 			"validator_pub":  Bech32PrefixValPub,
 			"consensus_pub":  Bech32PrefixConsPub,
 		},
+		txEncoder: nil,
 	}
 )
 
@@ -41,31 +43,34 @@ func (config *Config) assertNotSealed() {
 	}
 }
 
-// WithBech32PrefixForAccount builds the Config with Bech32 addressPrefix and publKeyPrefix for accounts
+// SetBech32PrefixForAccount builds the Config with Bech32 addressPrefix and publKeyPrefix for accounts
 // and returns the config instance
-func (config *Config) WithBech32PrefixForAccount(addressPrefix, pubKeyPrefix string) *Config {
+func (config *Config) SetBech32PrefixForAccount(addressPrefix, pubKeyPrefix string) {
 	config.assertNotSealed()
 	config.bech32AddressPrefix["account_addr"] = addressPrefix
 	config.bech32AddressPrefix["account_pub"] = pubKeyPrefix
-	return config
 }
 
-// WithBech32PrefixForValidator builds the Config with Bech32 addressPrefix and publKeyPrefix for validators
+// SetBech32PrefixForValidator builds the Config with Bech32 addressPrefix and publKeyPrefix for validators
 //  and returns the config instance
-func (config *Config) WithBech32PrefixForValidator(addressPrefix, pubKeyPrefix string) *Config {
+func (config *Config) SetBech32PrefixForValidator(addressPrefix, pubKeyPrefix string) {
 	config.assertNotSealed()
 	config.bech32AddressPrefix["validator_addr"] = addressPrefix
 	config.bech32AddressPrefix["validator_pub"] = pubKeyPrefix
-	return config
 }
 
-// WithBech32PrefixForConsensusNode builds the Config with Bech32 addressPrefix and publKeyPrefix for consensus nodes
+// SetBech32PrefixForConsensusNode builds the Config with Bech32 addressPrefix and publKeyPrefix for consensus nodes
 // and returns the config instance
-func (config *Config) WithBech32PrefixForConsensusNode(addressPrefix, pubKeyPrefix string) *Config {
+func (config *Config) SetBech32PrefixForConsensusNode(addressPrefix, pubKeyPrefix string) {
 	config.assertNotSealed()
 	config.bech32AddressPrefix["consensus_addr"] = addressPrefix
 	config.bech32AddressPrefix["consensus_pub"] = pubKeyPrefix
-	return config
+}
+
+// SetTxEncoder builds the Config with TxEncoder used to marshal StdTx to bytes
+func (config *Config) SetTxEncoder(encoder TxEncoder) {
+	config.assertNotSealed()
+	config.txEncoder = encoder
 }
 
 // Seal seals the config such that the config state could not be modified further
@@ -105,4 +110,9 @@ func (config *Config) GetBech32ValidatorPubPrefix() string {
 // GetBech32ConsensusPubPrefix returns the Bech32 prefix for consensus node public key
 func (config *Config) GetBech32ConsensusPubPrefix() string {
 	return config.bech32AddressPrefix["consensus_pub"]
+}
+
+// GetTxEncoder return function to encode transactions
+func (config *Config) GetTxEncoder() TxEncoder {
+	return config.txEncoder
 }

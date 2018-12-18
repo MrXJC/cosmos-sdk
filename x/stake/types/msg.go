@@ -3,8 +3,9 @@ package types
 import (
 	"bytes"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // name to identify transaction routes
@@ -68,6 +69,7 @@ func (msg MsgCreateValidator) GetSigners() []sdk.AccAddress {
 func (msg MsgCreateValidator) GetSignBytes() []byte {
 	b, err := MsgCdc.MarshalJSON(struct {
 		Description
+		Commission    CommissionMsg
 		DelegatorAddr sdk.AccAddress `json:"delegator_address"`
 		ValidatorAddr sdk.ValAddress `json:"validator_address"`
 		PubKey        string         `json:"pubkey"`
